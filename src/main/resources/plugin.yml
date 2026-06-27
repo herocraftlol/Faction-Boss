@@ -1,0 +1,18 @@
+name: FactionBosses
+version: 1.0
+main: com.factionbosses.FactionBosses
+api-version: '1.21'
+author: YourName
+description: Boss spawn plugin for Survival Faction servers
+
+commands:
+  spawnboss:
+    description: Spawn a boss at the median location of all players
+    usage: /spawnboss [zombie|skeleton]
+    permission: factionbosses.spawn
+    permission-message: You don't have permission to use this command!
+
+permissions:
+  factionbosses.spawn:
+    description: Allows spawning bosses
+    default: op
