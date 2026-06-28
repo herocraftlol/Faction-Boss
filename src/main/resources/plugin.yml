@@ -1,18 +1,23 @@
-name: FactionBosses
-version: 1.0
-main: com.factionbosses.FactionBosses
+name: FactionBoss
+version: ${project.version}
+main: fr.factionboss.FactionBoss
 api-version: '1.21'
-author: YourName
-description: Boss spawn plugin for Survival Faction servers
+description: Plugin de boss aléatoire pour serveur Faction
 
 commands:
-  spawnboss:
-    description: Spawn a boss at the median location of all players
-    usage: /spawnboss [zombie|skeleton]
-    permission: factionbosses.spawn
-    permission-message: You don't have permission to use this command!
+  bossspawn:
+    description: Force le spawn d'un boss (admin)
+    usage: /bossspawn
+    permission: factionboss.admin
+  bossinfo:
+    description: Affiche les infos sur le boss actuel
+    usage: /bossinfo
+    permission: factionboss.info
 
 permissions:
-  factionbosses.spawn:
-    description: Allows spawning bosses
+  factionboss.admin:
+    description: Permet de forcer le spawn d'un boss
     default: op
+  factionboss.info:
+    description: Permet de voir les infos du boss
+    default: true
