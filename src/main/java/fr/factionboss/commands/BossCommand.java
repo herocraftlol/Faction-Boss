@@ -39,7 +39,7 @@ public class BossCommand implements CommandExecutor {
                 }
                 boolean success = bossManager.spawnBoss();
                 if (!success) {
-                    sender.sendMessage(Component.text("Impossible de faire spawner le boss (aucun joueur en ligne ?).", NamedTextColor.RED));
+                    sender.sendMessage(Component.text("Impossible de faire spawner le boss (aucun joueur en ligne ou emplacement introuvable).", NamedTextColor.RED));
                 }
                 return true;
             }
@@ -53,18 +53,21 @@ public class BossCommand implements CommandExecutor {
                     sender.sendMessage(Component.text("Aucun boss n'est actuellement en vie.", NamedTextColor.YELLOW));
                 } else {
                     LivingEntity boss = bossManager.getCurrentBoss();
-                    String type = bossManager.getCurrentBossType().name();
+                    String type = bossManager.getBossDisplayName(bossManager.getCurrentBossType());
+                    String power = bossManager.getBossPowerDescription(bossManager.getCurrentBossType());
                     int x = boss.getLocation().getBlockX();
                     int y = boss.getLocation().getBlockY();
                     int z = boss.getLocation().getBlockZ();
-                    double hp = Math.round(boss.getHealth() * 10.0) / 10.0;
+                    double hp    = Math.round(boss.getHealth() * 10.0) / 10.0;
                     double maxHp = Math.round(boss.getAttribute(
                             org.bukkit.attribute.Attribute.GENERIC_MAX_HEALTH).getValue() * 10.0) / 10.0;
 
-                    sender.sendMessage(Component.text("--- Boss actuel ---", NamedTextColor.GOLD));
-                    sender.sendMessage(Component.text("Type : " + type, NamedTextColor.YELLOW));
-                    sender.sendMessage(Component.text("Position : X:" + x + " Y:" + y + " Z:" + z, NamedTextColor.YELLOW));
-                    sender.sendMessage(Component.text("Vie : " + hp + " / " + maxHp, NamedTextColor.RED));
+                    sender.sendMessage(Component.text("━━━━━━━━━━━━━ Boss actuel ━━━━━━━━━━━━━", NamedTextColor.GOLD));
+                    sender.sendMessage(Component.text("Type    : " + type, NamedTextColor.YELLOW));
+                    sender.sendMessage(Component.text("Pouvoir : " + power, NamedTextColor.LIGHT_PURPLE));
+                    sender.sendMessage(Component.text("Position: X:" + x + " Y:" + y + " Z:" + z, NamedTextColor.YELLOW));
+                    sender.sendMessage(Component.text("Vie     : " + hp + " / " + maxHp, NamedTextColor.RED));
+                    sender.sendMessage(Component.text("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━", NamedTextColor.GOLD));
                 }
                 return true;
             }

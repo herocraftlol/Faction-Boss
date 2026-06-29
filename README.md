@@ -1,19 +1,19 @@
 # FactionBoss - Minecraft 1.21 Boss Plugin
 
-Plugin de boss aléatoire pour serveur Survival Faction Minecraft 1.21.
+Plugin de boss avancé pour serveur Survival Faction Minecraft 1.21 avec 6 types de boss uniques et pouvoirs spéciaux.
 
 ## Fonctionnalités
 
-- **Deux types de boss** : Zombie Boss et Squelette Boss
+- **6 types de boss** : Zombie, Squelette, Wither, Araignée, Blaze, Sorcière
 - **Spawn automatique** : Les boss spawn toutes les 45 minutes à 1 heure
-- **Position médiane** : Les boss spawn au point central de tous les joueurs en ligne
-- **Équipement personnalisé** : Armure en diamant enchantée et armes enchantées
-- **Drops aléatoires** : 50% de chance pour une arme enchantée, 50% pour 5-10 diamants
+- **Position sécurisée** : Spawn à 50+ blocs de tous les joueurs
+- **Pouvoirs spéciaux** : Chaque boss a un pouvoir unique qui s'active toutes les 60 secondes
+- **Drops uniques** : Chaque boss drop des objets spécifiques + récompense
 - **Annonces de mort** : Message dans le chat avec le nom du tueur
 
 ## Installation
 
-1. Téléchargez le JAR depuis la page des [Releases](https://github.com/abelliardadresse-alt/Faction-Boss/releases)
+1. Téléchargez le JAR depuis la page des [Releases](https://github.com/herocraftlol/Faction-Boss/releases)
 2. Placez le fichier `.jar` dans le dossier `plugins` de votre serveur
 3. Redémarrez le serveur
 
@@ -32,25 +32,31 @@ Le JAR sera dans `target/`
 | `/bossspawn` | Force le spawn d'un boss (admin) | `factionboss.admin` |
 | `/bossinfo` | Affiche les infos du boss actuel | `factionboss.info` |
 
-## Statistiques des Boss
+## Les 6 Boss
 
-### Zombie Boss
-- **Vie** : 100 HP
-- **Vitesse** : 0.35 (Speed II)
-- **Arme** : Épée en diamant (Tranchant 3 + Mending)
-- **Armure** : Full diamant (Protection 3 + Solidité 3)
-- **Drops** : Épée enchantée (50%) ou 5-10 diamants (50%)
+### Zombie Boss (150 HP)
+- **Pouvoir** : Invoque des zombies serviteurs
+- **Drops** : Épée Tranchant 4 + Mending ou 5-10 diamants
 
-### Squelette Boss
-- **Vie** : 80 HP
-- **Vitesse** : 0.30 (Speed I)
-- **Arme** : Arc (Puissance 2 + Mending)
-- **Armure** : Full diamant (Protection 3 + Solidité 3)
-- **Drops** : Arc enchanté (50%) ou 5-10 diamants (50%)
+### Squelette Boss (120 HP)
+- **Pouvoir** : Convoque des archers + éclairs
+- **Drops** : Arc Power 3 + Punch 2 ou 5-10 diamants
 
-## Configuration
+### Wither Boss (200 HP)
+- **Pouvoir** : Répand le Wither + Lenteur
+- **Drops** : Tête de Wither + Épée Netherite Tranchant 5 ou lingots netherite
 
-Aucune configuration nécessaire - le plugin fonctionne directement !
+### Araignée Boss (100 HP)
+- **Pouvoir** : Envoie des araignées + Poison + Cécité
+- **Drops** : Trident Loyalty 3 ou émeraudes
+
+### Blaze Boss (130 HP)
+- **Pouvoir** : Flammes + éclairs + blazes
+- **Drops** : Épée Fire Aspect 3 ou lingots d'or
+
+### Sorcière Boss (110 HP)
+- **Pouvoir** : Potions maléfiques + téléportation
+- **Drops** : Bâton de Sorcière ou améthystes
 
 ## Prérequis
 

@@ -2,5 +2,9 @@ package fr.factionboss.models;
 
 public enum BossType {
     ZOMBIE,
-    SKELETON
+    SKELETON,
+    WITHER_SKELETON,
+    SPIDER,
+    BLAZE,
+    WITCH
 }

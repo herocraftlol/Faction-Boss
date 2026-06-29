@@ -22,17 +22,13 @@ public class BossDeathListener implements Listener {
     @EventHandler(priority = EventPriority.HIGH)
     public void onEntityDeath(EntityDeathEvent event) {
         if (!(event.getEntity() instanceof LivingEntity entity)) return;
-
         if (!bossManager.isBoss(entity)) return;
 
-        // Supprimer tous les drops vanilla
+        // Supprimer tous les drops vanilla (on gère les drops dans handleBossDeath)
         event.getDrops().clear();
-        event.setDroppedExp(0);
+        event.setDroppedExp(500); // XP bonus pour tuer un boss
 
-        // Récupérer le tueur (peut être null si tué par l'environnement)
         Player killer = event.getEntity().getKiller();
-
-        // Gérer la mort : drops custom + annonce
         bossManager.handleBossDeath(entity, killer);
     }
 }
