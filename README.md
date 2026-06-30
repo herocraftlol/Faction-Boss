@@ -1,13 +1,15 @@
 # FactionBoss - Minecraft 1.21 Boss Plugin
 
-Plugin de boss avancé pour serveur Survival Faction Minecraft 1.21 avec 6 types de boss uniques et pouvoirs spéciaux.
+Plugin de boss avancé pour serveur Survival Faction Minecraft 1.21 avec 6 types de boss uniques, pouvoirs spéciaux et système de regen désactivée.
 
 ## Fonctionnalités
 
 - **6 types de boss** : Zombie, Squelette, Wither, Araignée, Blaze, Sorcière
-- **Spawn automatique** : Les boss spawn toutes les 45 minutes à 1 heure
+- **Spawn automatique** : Les boss spawn toutes les 1h15
 - **Position sécurisée** : Spawn à 50+ blocs de tous les joueurs
 - **Pouvoirs spéciaux** : Chaque boss a un pouvoir unique qui s'active toutes les 60 secondes
+- **Pas de régénération** : Les boss ne peuvent pas se soigner
+- **500 XP** : Bonus d'expérience à la mort du boss
 - **Drops uniques** : Chaque boss drop des objets spécifiques + récompense
 - **Annonces de mort** : Message dans le chat avec le nom du tueur
 

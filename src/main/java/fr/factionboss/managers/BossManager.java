@@ -28,14 +28,22 @@ public class BossManager {
     private LivingEntity currentBoss = null;
     private BossType currentBossType = null;
 
+    // Minions actuellement invoqués par le boss et toujours en vie
+    private final List<LivingEntity> activeMinions = new ArrayList<>();
+
     // Timers
     private BukkitTask spawnTask = null;
     private BukkitTask powerTask = null;   // Pouvoirs du boss (toutes les 60s)
+    private BukkitTask healthDisplayTask = null; // Affichage de la vie au-dessus de la tête
 
-    // Intervalle : 45min = 54000 ticks, 1h = 72000 ticks
-    private static final long MIN_DELAY  = 54000L;
-    private static final long MAX_DELAY  = 72000L;
-    private static final long POWER_TICK = 1200L; // 60 secondes
+    // Nom de base du boss actuel (sans la vie), utilisé pour reconstruire l'affichage
+    private String currentBossBaseName = null;
+    private NamedTextColor currentBossNameColor = null;
+
+    // Intervalle entre chaque spawn de boss : 1h15 = 90000 ticks
+    private static final long SPAWN_DELAY = 90000L;
+    private static final long POWER_TICK  = 1200L; // 60 secondes
+    private static final long HEALTH_DISPLAY_TICK = 10L; // 0.5 seconde : actualisation en temps réel
 
     // Distance minimale de spawn par rapport aux joueurs (en blocs)
     private static final double MIN_SPAWN_DISTANCE = 50.0;
@@ -56,7 +64,7 @@ public class BossManager {
     }
 
     private void scheduleNextSpawn() {
-        long delay = MIN_DELAY + (long) (Math.random() * (MAX_DELAY - MIN_DELAY));
+        long delay = SPAWN_DELAY;
         double minutes = delay / 20.0 / 60.0;
         plugin.getLogger().info(String.format("Prochain boss dans %.1f minutes.", minutes));
 
@@ -73,10 +81,15 @@ public class BossManager {
     public void cancelTimer() {
         if (spawnTask != null) { spawnTask.cancel(); spawnTask = null; }
         cancelPowerTask();
+        cancelHealthDisplayTask();
     }
 
     private void cancelPowerTask() {
         if (powerTask != null) { powerTask.cancel(); powerTask = null; }
+    }
+
+    private void cancelHealthDisplayTask() {
+        if (healthDisplayTask != null) { healthDisplayTask.cancel(); healthDisplayTask = null; }
     }
 
     // ─── Spawn ───────────────────────────────────────────────────────────────
@@ -110,8 +123,12 @@ public class BossManager {
 
         currentBoss     = boss;
         currentBossType = type;
+        activeMinions.clear();
+        currentBossBaseName  = getBossDisplayName(type);
+        currentBossNameColor = getBossColor(type);
 
         startPowerTask(boss, type);
+        startHealthDisplayTask(boss);
 
         // Annonce dans le chat
         int bx = spawnLoc.getBlockX();
@@ -201,7 +218,49 @@ public class BossManager {
         }, POWER_TICK, POWER_TICK);
     }
 
+    /**
+     * Démarre la tâche qui affiche et actualise en temps réel la vie du boss
+     * au-dessus de sa tête (ex : "Zombie Boss ❤ 85/150").
+     */
+    private void startHealthDisplayTask(LivingEntity boss) {
+        cancelHealthDisplayTask();
+        updateBossHealthDisplay(boss);
+        healthDisplayTask = Bukkit.getScheduler().runTaskTimer(plugin, () -> {
+            if (boss == null || boss.isDead() || !boss.isValid()) {
+                cancelHealthDisplayTask();
+                return;
+            }
+            updateBossHealthDisplay(boss);
+        }, HEALTH_DISPLAY_TICK, HEALTH_DISPLAY_TICK);
+    }
+
+    /** Met à jour le nom affiché au-dessus du boss avec sa vie actuelle. */
+    private void updateBossHealthDisplay(LivingEntity boss) {
+        if (currentBossBaseName == null) return;
+
+        double health    = Math.max(0, boss.getHealth());
+        double maxHealth = Objects.requireNonNull(boss.getAttribute(Attribute.GENERIC_MAX_HEALTH)).getValue();
+
+        Component name = Component.text(currentBossBaseName + " ", currentBossNameColor, TextDecoration.BOLD)
+                .append(Component.text("❤ ", NamedTextColor.RED, TextDecoration.BOLD))
+                .append(Component.text((int) Math.ceil(health) + "/" + (int) Math.ceil(maxHealth),
+                        NamedTextColor.WHITE, TextDecoration.BOLD));
+
+        boss.customName(name);
+        boss.setCustomNameVisible(true);
+    }
+
     private void activateBossPower(LivingEntity boss, BossType type) {
+        // Nettoyer la liste des minions morts/invalides
+        activeMinions.removeIf(m -> m == null || m.isDead() || !m.isValid());
+
+        // Ne pas invoquer de nouveaux monstres tant que ceux déjà invoqués sont en vie
+        if (!activeMinions.isEmpty()) {
+            plugin.getLogger().info("Invocation du boss reportée : " + activeMinions.size()
+                    + " minion(s) encore en vie.");
+            return;
+        }
+
         Location bossLoc = boss.getLocation();
         World world      = bossLoc.getWorld();
 
@@ -217,6 +276,7 @@ public class BossManager {
                     minion.setCustomNameVisible(true);
                     Objects.requireNonNull(minion.getAttribute(Attribute.GENERIC_MAX_HEALTH)).setBaseValue(20.0);
                     minion.setHealth(20.0);
+                    activeMinions.add(minion);
                 }
                 broadcastPower(bossLoc, "§c☠ Le Zombie Boss invoque ses serviteurs !");
             }
@@ -229,6 +289,7 @@ public class BossManager {
                     Skeleton minion = (Skeleton) world.spawnEntity(ml, EntityType.SKELETON);
                     minion.customName(Component.text("Archer Minion", NamedTextColor.AQUA));
                     minion.setCustomNameVisible(true);
+                    activeMinions.add(minion);
                 }
                 // Éclairs autour des joueurs proches (effet visuel)
                 for (Player p : world.getPlayers()) {
@@ -252,6 +313,7 @@ public class BossManager {
                     WitherSkeleton ws = (WitherSkeleton) world.spawnEntity(ml, EntityType.WITHER_SKELETON);
                     ws.customName(Component.text("Ombre Noire", NamedTextColor.DARK_GRAY));
                     ws.setCustomNameVisible(true);
+                    activeMinions.add(ws);
                 }
                 // Explosion visuelle (aucun dégât)
                 world.createExplosion(bossLoc, 0f, false, false);
@@ -265,6 +327,7 @@ public class BossManager {
                     Spider spider = (Spider) world.spawnEntity(ml, EntityType.SPIDER);
                     spider.customName(Component.text("Toile Venimeuse", NamedTextColor.DARK_GREEN));
                     spider.setCustomNameVisible(true);
+                    activeMinions.add(spider);
                 }
                 for (Player p : world.getPlayers()) {
                     if (p.getLocation().distance(bossLoc) < 15) {
@@ -288,6 +351,7 @@ public class BossManager {
                     Blaze blaze = (Blaze) world.spawnEntity(ml, EntityType.BLAZE);
                     blaze.customName(Component.text("Flamme Infernale", NamedTextColor.GOLD));
                     blaze.setCustomNameVisible(true);
+                    activeMinions.add(blaze);
                 }
                 broadcastPower(bossLoc, "§6☠ Le Blaze Boss embrase les cieux !");
             }
@@ -306,6 +370,7 @@ public class BossManager {
                     Witch witch = (Witch) world.spawnEntity(ml, EntityType.WITCH);
                     witch.customName(Component.text("Apprentie Sorcière", NamedTextColor.DARK_PURPLE));
                     witch.setCustomNameVisible(true);
+                    activeMinions.add(witch);
                 }
                 // Téléporte la sorcière aléatoirement (comportement chaotique)
                 Location teleportLoc = randomNearby(bossLoc, 10);
@@ -547,6 +612,7 @@ public class BossManager {
      */
     public void handleBossDeath(LivingEntity boss, Player killer) {
         cancelPowerTask();
+        cancelHealthDisplayTask();
 
         Location loc = boss.getLocation();
         String bossTypeStr = boss.getPersistentDataContainer().get(bossKey, PersistentDataType.STRING);
@@ -556,6 +622,9 @@ public class BossManager {
 
         currentBoss     = null;
         currentBossType = null;
+        activeMinions.clear();
+        currentBossBaseName  = null;
+        currentBossNameColor = null;
 
         String killerName = (killer != null) ? killer.getName() : "un inconnu";
         String bossDisplayName = getBossDisplayNameFromKey(bossTypeStr);
